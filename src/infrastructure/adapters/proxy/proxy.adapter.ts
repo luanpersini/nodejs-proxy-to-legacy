@@ -24,10 +24,8 @@ export class ProxyAdapter {
     body,
     headers,
   }: ProxyRequest): Promise<ProxyResponse> {
-    console.log('test');
     const apiEndpoint = originalUrl.slice(7, 999);
-    const apiUrl = `https://api.github.com/${apiEndpoint}`;
-    console.log('apiUrl', apiUrl);
+    const apiUrl = `http://localhost:8080/${apiEndpoint}`;
 
     try {
       const response$ = this.httpService.request({
@@ -44,7 +42,6 @@ export class ProxyAdapter {
         data: response.data,
       };
     } catch (error) {
-      console.log(error);
       throw Error('Error occurred while proxying request.');
     }
   }
