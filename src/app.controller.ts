@@ -1,59 +1,52 @@
-import { HttpService } from '@nestjs/axios';
-import { Controller, Get, Post, Req, Res } from '@nestjs/common';
+import { Controller, Delete, Get, Post, Put, Req, Res } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { firstValueFrom } from 'rxjs';
+import { ProxyAdapter } from './infrastructure/adapters/proxy/proxy.adapter';
 
 @Controller('proxy')
 export class AppController {
-  constructor(private readonly httpService: HttpService) {}
+  constructor(private readonly proxyAdapter: ProxyAdapter) {}
 
   @Get('*')
   async getProxy(@Req() req: Request, @Res() res: Response) {
-    const apiEndpoint = req.originalUrl.slice(7, 999);
-    const apiUrl = `http://localhost:8080/${apiEndpoint}`;
-
-    try {
-      const response$ = this.httpService.request({
-        method: req.method,
-        url: apiUrl,
-        data: req.body,
-        headers: req.headers,
-      });
-
-      const response = await firstValueFrom(response$);
-
-      return res.status(response.status).json(response.data);
-    } catch (error) {
-      console.log(error);
-
-      return res
-        .status(500)
-        .json({ message: 'Error occurred while proxying request.' });
-    }
+    const response = await this.proxyAdapter.execute({
+      originalUrl: req.originalUrl,
+      method: 'GET',
+      body: req.body,
+      headers: req.headers,
+    });
+    return res.status(response.status).json(response.data);
   }
 
   @Post('*')
   async postProxy(@Req() req: Request, @Res() res: Response) {
-    const apiEndpoint = req.originalUrl.slice(7, 999);
-    const apiUrl = `http://localhost:8080/${apiEndpoint}`;
+    const response = await this.proxyAdapter.execute({
+      originalUrl: req.originalUrl,
+      method: 'POST',
+      body: req.body,
+      headers: req.headers,
+    });
+    return res.status(response.status).json(response.data);
+  }
 
-    try {
-      const response$ = this.httpService.request({
-        method: req.method,
-        url: apiUrl,
-        data: req.body,
-        headers: req.headers,
-      });
+  @Put('*')
+  async putProxy(@Req() req: Request, @Res() res: Response) {
+    const response = await this.proxyAdapter.execute({
+      originalUrl: req.originalUrl,
+      method: 'PUT',
+      body: req.body,
+      headers: req.headers,
+    });
+    return res.status(response.status).json(response.data);
+  }
 
-      const response = await firstValueFrom(response$);
-
-      return res.status(response.status).json(response.data);
-    } catch (error) {
-      console.log(error);
-
-      return res
-        .status(500)
-        .json({ message: 'Error occurred while proxying request.' });
-    }
+  @Delete('*')
+  async deleteProxy(@Req() req: Request, @Res() res: Response) {
+    const response = await this.proxyAdapter.execute({
+      originalUrl: req.originalUrl,
+      method: 'DELETE',
+      body: req.body,
+      headers: req.headers,
+    });
+    return res.status(response.status).json(response.data);
   }
 }
