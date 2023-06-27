@@ -1,5 +1,5 @@
 import { HttpService } from '@nestjs/axios'
-import { Injectable } from '@nestjs/common'
+import { Injectable, InternalServerErrorException } from '@nestjs/common'
 import { firstValueFrom } from 'rxjs'
 
 type ProxyRequest = {
@@ -30,13 +30,19 @@ export class ProxyAdapter {
         headers: headers
       })
       const response = await firstValueFrom(response$)
-
+      console.log('response')
+      console.log(response)
       return {
         status: response.status,
         data: response.data
       }
     } catch (error) {
-      throw Error('Error occurred while proxying request.')
+      if (error.response) {
+        const { status, data } = error.response
+        return { status, data }
+      } else {
+        throw new InternalServerErrorException('Error occurred while proxying request.')
+      }
     }
   }
 }
