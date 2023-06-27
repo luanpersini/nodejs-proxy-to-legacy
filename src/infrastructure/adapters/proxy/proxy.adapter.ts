@@ -30,8 +30,6 @@ export class ProxyAdapter {
         headers: headers
       })
       const response = await firstValueFrom(response$)
-      console.log('response')
-      console.log(response)
       return {
         status: response.status,
         data: response.data
